@@ -1,12 +1,49 @@
 const express = require('express');
 const router = express.Router();
+const basicAuth = require('express-basic-auth');//se necesita instalar por npm
 
 const mysqlConnection = require('../database');
+
+const cors = require("cors");//se necesita instalar por npm
+
+const {
+    base64decode
+  } = require('nodejs-base64');
+  
+router.use(cors());
+
+
+// verifica la autentificacion
+router.use('/use', (req, res) => {
+    if (req.headers["authorization"]) {
+      const authBase64 = req.headers['authorization'].split(' ');
+      const userPass = base64decode(authBase64[1]);
+      const usario = userPass.split(':')[0];
+      const password = userPass.split(':')[1];
+  
+      //
+      if (usario === 'kendall' && password == '2812') {
+
+        res.status(201);
+        res.send({
+            menssage: "autorizado."
+        });
+        return;
+      }
+    }
+    res.status(401);
+    res.send({
+      error: "No autorizado."
+    });
+    return;
+});
+
 
 /* Esta parte es controlar todo lo que tiene que ver con productos */
 
 // extrae todo los productos de la tabla
 router.get('/producto/', (req, res) => {
+    
     mysqlConnection.query('SELECT * FROM productos;', (err, rows, fields) => {
       if(!err) {
         res.json(rows);
