@@ -3,9 +3,10 @@ const router = express.Router();
 
 const mysqlConnection = require('../database');
 
+/* Esta parte es controlar todo lo que tiene que ver con productos */
 
 // extrae todo los productos de la tabla
-router.get('/', (req, res) => {
+router.get('/producto/', (req, res) => {
     mysqlConnection.query('SELECT * FROM productos;', (err, rows, fields) => {
       if(!err) {
         res.json(rows);
@@ -21,12 +22,12 @@ router.get('/', (req, res) => {
 });
 
 //este es para insertar nuevos datos en la base de datos
-router.post('/', (req, res) => {
+router.post('/producto/', (req, res) => {
     const {sku, nombre_producto, descripcion, precio, cantidad, id_categoria} = req.body;
-    const query = 'INSERT INTO productos(sku, nombre_producto, descripcion, precio, cantidad, id_categoria) VALUES (?,?,?,?,?,?);',[sku], [nombre_producto], [descripcion], [precio], [cantidad], [id_categoria];
+     query = 'INSERT INTO productos(sku, nombre_producto, descripcion, precio, cantidad, id_categoria) VALUES (?,?,?,?,?,?)';
     
     if(id_categoria != null && id_categoria != ""){
-        mysqlConnection.query(query, (err, rows, fields) => {
+        mysqlConnection.query(query, [sku, nombre_producto, descripcion, precio, cantidad, id_categoria], (err, rows, fields) => {
         if(!err){
             // Devolvemos una respuesta en JSON
             res.status(201).send({
@@ -40,46 +41,74 @@ router.post('/', (req, res) => {
   });
   
   //esta funcion es para acutulizar los datos en la base de datos
-  router.put('/:id', (req, res) => {
-    const {nombre, apellido,correo,direccion} = req.body;
-    const {id} = req.params;
-    const query = `CALL studenAddOrEdit(?,?,?,?,?);`;
-  
-    if(nombre != null && nombre != ""){
-      if(apellido != null && apellido != ""){
-        if(correo != null && correo != ""){
-          if(direccion != null && direccion != ""){
-            mysqlConnection.query(query, [id, nombre, apellido, correo, direccion], (err, rows, fields) => {
-              if(!err){
-                res.json({Status: 'Se actualizo correctamente'});
+  router.put('/producto/:id_producto', (req, res) => {
+    const {sku, nombre_producto, descripcion, precio, cantidad, id_categoria} = req.body;
+    const {id_producto} = req.params;
+    const query = `UPDATE productos SET sku=?,nombre_producto=?,descripcion=?,precio=?,cantidad=?,id_categoria=? WHERE id_producto=?`;
+
+    if(sku != null && sku != ""){
+      if(nombre_producto != null && nombre_producto != ""){
+        if(descripcion != null && descripcion != ""){
+          if(precio != null && precio != ""){
+              if(cantidad != null && cantidad != ""){
+                if(id_categoria != null && id_categoria != ""){
+                    mysqlConnection.query(query, [sku, nombre_producto, descripcion, precio, cantidad, id_categoria, id_producto], (err, rows, fields) => {
+                        if(!err){
+                            res.status(200).send({
+                                menssage: 'actualizo correctamente.'
+                            });
+                        }else{
+                          console.log(err);
+                        }
+                      });
+                }else{
+                    res.status(202).send({
+                        menssage: 'Falta categoria'
+                    });
+                }
               }else{
-                console.log(err);
+                res.status(202).send({
+                    menssage: 'Falta cantidad.'
+                });
               }
-            });
           }else{
-            res.json({Status: 'La direccion no debe quedar vacia o null.'});
+            res.status(202).send({
+                menssage: 'Falta precio.'
+            });
           }
         }else{
-          res.json({Status: 'El correo no debe quedar vacio o null.'});
+            res.status(202).send({
+                menssage: 'Falta descripcion.'
+            });
         }
       }else{
-        res.json({Status: 'El apellido no debe quedar vacio o null.'});
+        res.status(202).send({
+            menssage: 'Falta nombre producto.'
+        });
       } 
     }else{
-      res.json({Status: 'El nombre no debe quedar vacio o null.'});
+        res.status(202).send({
+            menssage: 'Falta sku.'
+        });
     } 
   });
-  
-  router.delete('/:id', (req, res) => {
-    const {id} = req.params;
-    mysqlConnection.query('DELETE FROM estudiantes WHERE id = ?', [id] , (err, rows,
+
+  //esta fucion es para eliminar un producto
+  router.delete('/producto/:id_producto', (req, res) => {
+    const {id_producto} = req.params;
+    mysqlConnection.query('DELETE FROM productos WHERE id_producto = ?', [id_producto] , (err, rows,
       fields) => {
         if(!err){
-          res.json({status: 'El estudiante fue eliminado.'});
+            res.status(204).send({
+                menssage: 'No Content'
+            });
         }else{
           console.log(err);
         }
       })
   })
+
+
+/* Esta parte es controlar todo lo que tiene que ver con categorias */
 
 module.exports = router;
