@@ -14,8 +14,10 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-basic-auth": "^1.1.6",
+    "express-session": "^1.15.6",
     "mysql": "^2.16.0",
-    "nodejs-base64": "^1.0.3"
+    "nodejs-base64": "^1.0.3",
+    "session": "^0.1.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"
